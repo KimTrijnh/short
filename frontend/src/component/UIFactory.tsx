@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { App } from './App';
 import { IFeatureDecisionService } from '../service/FeatureDecision.service';
-import { Home } from './pages/Home';
+import { HomePage } from './pages/HomePage';
 import H from 'history';
 import { AuthService } from '../service/Auth.service';
 import { IBrowserExtensionService } from '../service/extensionService/BrowserExtension.service';
@@ -19,6 +19,7 @@ import { SearchBar } from './ui/SearchBar';
 import { ViewChangeLogButton } from './ui/ViewChangeLogButton';
 import { ChangeLogService } from '../service/ChangeLog.service';
 import { IClipboardService } from '../service/clipboardService/Clipboard.service';
+import { AdminPage } from './pages/AdminPage';
 
 export class UIFactory {
   constructor(
@@ -37,7 +38,7 @@ export class UIFactory {
 
   public createHomePage(location: H.Location<any>): ReactElement {
     return (
-      <Home
+      <HomePage
         uiFactory={this}
         authService={this.authService}
         clipboardService={this.clipboardService}
@@ -52,6 +53,10 @@ export class UIFactory {
         location={location}
       />
     );
+  }
+
+  public createAdminPage(location: H.Location<any>): ReactElement {
+    return <AdminPage />;
   }
 
   public createViewChangeLogButton(props: any): ReactElement {

@@ -32,6 +32,12 @@ export class App extends Component<IProps> {
               return <div />;
             }}
           />
+          <Route
+            path={'/admin'}
+            render={({ location }) =>
+              this.props.uiFactory.createAdminPage(location)
+            }
+          />
           <Route component={NotFoundPage} />
         </Switch>
       </Router>

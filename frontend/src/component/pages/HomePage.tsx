@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import './Home.scss';
+import './HomePage.scss';
 
 import { Header } from './shared/Header';
 import { Url } from '../../entity/Url';
@@ -35,6 +35,7 @@ import { ChangeLogService } from '../../service/ChangeLog.service';
 import { CreateShortLinkSection } from './shared/CreateShortLinkSection';
 import { Toast } from '../ui/Toast';
 import { IClipboardService } from '../../service/clipboardService/Clipboard.service';
+import { Icon, IconID } from '../ui/Icon';
 
 interface Props {
   uiFactory: UIFactory;
@@ -65,7 +66,7 @@ interface State {
   changeLog?: Array<Update>;
 }
 
-export class Home extends Component<Props, State> {
+export class HomePage extends Component<Props, State> {
   errModal = React.createRef<Modal>();
   signInModal = React.createRef<SignInModal>();
   createShortLinkSection = React.createRef<CreateShortLinkSection>();
@@ -312,13 +313,10 @@ export class Home extends Component<Props, State> {
         >
           {this.state.err && (
             <div className={'err'}>
-              <i
-                className={'material-icons close'}
-                title={'close'}
+              <Icon
+                defaultIconID={IconID.Close}
                 onClick={this.handleOnErrModalCloseClick}
-              >
-                close
-              </i>
+              />
               <div className={'title'}>{this.state.err.name}</div>
               <div className={'description'}>{this.state.err.description}</div>
             </div>
