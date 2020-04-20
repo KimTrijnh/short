@@ -34,6 +34,7 @@ type ServiceConfig struct {
 	DataDogAPIKey        string
 	SegmentAPIKey        string
 	IPStackAPIKey        string
+	OptimizelySDKKey     string
 }
 
 // Start launches the GraphQL & HTTP APIs

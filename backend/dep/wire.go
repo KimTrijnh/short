@@ -27,10 +27,11 @@ import (
 	"github.com/short-d/short/app/adapter/github"
 	"github.com/short-d/short/app/adapter/google"
 	"github.com/short-d/short/app/adapter/graphql"
-	"github.com/short-d/short/app/adapter/instrumentation"
 	"github.com/short-d/short/app/adapter/kgs"
+	"github.com/short-d/short/app/adapter/request"
 	"github.com/short-d/short/app/usecase/account"
 	"github.com/short-d/short/app/usecase/changelog"
+	"github.com/short-d/short/app/usecase/feature"
 	"github.com/short-d/short/app/usecase/repository"
 	"github.com/short-d/short/app/usecase/requester"
 	"github.com/short-d/short/app/usecase/service"
@@ -58,7 +59,7 @@ var observabilitySet = wire.NewSet(
 	provider.NewDataDogMetrics,
 	provider.NewSegment,
 	mdnetwork.NewProxy,
-	instrumentation.NewFactory,
+	request.NewInstrumentationFactory,
 )
 
 var githubAPISet = wire.NewSet(
@@ -83,6 +84,12 @@ var keyGenSet = wire.NewSet(
 	wire.Bind(new(service.KeyFetcher), new(kgs.RPC)),
 	provider.NewKgsRPC,
 	provider.NewKeyGenerator,
+)
+
+var featureDecisionSet = wire.NewSet(
+	wire.Bind(new(repository.FeatureToggle), new(db.FeatureToggleSQL)),
+	db.NewFeatureToggleSQL,
+	feature.NewDecisionFactory,
 )
 
 // InjectCommandFactory creates CommandFactory with configured dependencies.
@@ -215,6 +222,7 @@ func InjectRoutingService(
 		facebookAPISet,
 		googleAPISet,
 		keyGenSet,
+		featureDecisionSet,
 
 		mdruntime.NewBuildIn,
 		mdservice.New,
@@ -224,6 +232,7 @@ func InjectRoutingService(
 		mdrequest.NewGraphQL,
 		mdtimer.NewTimer,
 		provider.NewIPStack,
+		request.NewClient,
 
 		db.NewUserSQL,
 		db.NewURLSql,
