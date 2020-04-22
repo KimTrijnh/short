@@ -20,9 +20,10 @@ type ChangeLog interface {
 
 // Persist retrieves change log from and saves changes to persistent data store.
 type Persist struct {
-	keyGen        keygen.KeyGenerator
-	timer         fw.Timer
-	changeLogRepo repository.ChangeLog
+	keyGen            keygen.KeyGenerator
+	timer             fw.Timer
+	changeLogRepo     repository.ChangeLog
+	userChangeLogRepo repository.UserChangeLog
 }
 
 // CreateChange creates a new change in the data store.
@@ -47,10 +48,18 @@ func (p Persist) GetChangeLog() ([]entity.Change, error) {
 }
 
 // GetLastViewedAt retrieves the last time the user viewed the change log
-// TODO(issue#613): fetch the last time the user viewed the change log from persistent storage.
 func (p Persist) GetLastViewedAt(user entity.User) *time.Time {
-	now := p.timer.Now()
-	return &now
+	lastViewedAt, err := p.userChangeLogRepo.GetLastViewedAt(user)
+	switch err.(type) {
+	case repository.ErrEntryNotFound:
+		now := p.timer.Now()
+		err := p.userChangeLogRepo.CreateRelation(user, now)
+		if err != nil {
+			return nil
+		}
+		return &now
+	}
+	return &lastViewedAt
 }
 
 // NewPersist creates Persist
@@ -58,10 +67,12 @@ func NewPersist(
 	keyGen keygen.KeyGenerator,
 	timer fw.Timer,
 	changeLog repository.ChangeLog,
+	userChangeLog repository.UserChangeLog,
 ) Persist {
 	return Persist{
-		keyGen:        keyGen,
-		timer:         timer,
-		changeLogRepo: changeLog,
+		keyGen:            keyGen,
+		timer:             timer,
+		changeLogRepo:     changeLog,
+		userChangeLogRepo: userChangeLog,
 	}
 }
