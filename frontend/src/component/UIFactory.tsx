@@ -98,11 +98,17 @@ export class UIFactory {
   }
 
   public createPublicListingToggle(props: any): ReactElement {
-    const decision = this.featureDecisionService.includePublicListingToggle();
-    const ToggledComponent = withFeatureToggle(PublicListingToggle, decision);
+    // TODO(issue#???): Toggled component resets when typing on text field
+    // const decision = this.featureDecisionService.includePublicListingToggle();
+    // const ToggledComponent = withFeatureToggle(PublicListingToggle, decision);
+    // return (
+    //   <ToggledComponent
+    //     isShortLinkPublic={props.isShortLinkPublic}
+    //     onToggleClick={props.onPublicToggleClick}
+    //   />
+    // );
     return (
-      <ToggledComponent
-        isShortLinkPublic={props.isShortLinkPublic}
+      <PublicListingToggle
         onToggleClick={props.onPublicToggleClick}
       />
     );

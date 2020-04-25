@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Toggle } from "../../ui/Toggle";
 
 interface IProps {
-    isShortLinkPublic: boolean;
     onToggleClick?: (enabled: boolean) => void;
 }
 
@@ -19,7 +18,7 @@ export class PublicListingToggle extends Component<IProps> {
         return (
             <div className={'creation-toggle'}>
                 <Toggle
-                    defaultIsEnabled={this.props.isShortLinkPublic}
+                    defaultIsEnabled={false}
                     // onClick={this.props.onToggleClick}/>
                     onClick={this.handleToggleClick.bind(this)} />
                 <span className={'toggle-label'}>

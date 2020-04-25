@@ -7,6 +7,7 @@ import { ShortLinkUsage } from './ShortLinkUsage';
 import { Section } from '../../ui/Section';
 import { Url } from '../../../entity/Url';
 import { UIFactory } from '../../UIFactory';
+import { PublicListingToggle } from './PublicListingToggle';
 
 interface Props {
   uiFactory: UIFactory;
@@ -16,7 +17,6 @@ interface Props {
   inputErr?: string;
   createdUrl?: Url;
   qrCodeUrl?: string;
-  isShortLinkPublic?: boolean;
   onLongLinkTextFieldBlur?: () => void;
   onLongLinkTextFieldChange?: (newLongLink: string) => void;
   onShortLinkTextFieldBlur?: () => void;
@@ -65,7 +65,6 @@ export class CreateShortLinkSection extends Component<Props> {
         <div className={'input-error'}>{this.props.inputErr}</div>
         <div className={'creation-toggles'}>
           {this.props.uiFactory.createPublicListingToggle({
-            isShortLinkPublic: this.props.isShortLinkPublic,
             onPublicToggleClick: this.props.onPublicToggleClick
           })}
         </div>

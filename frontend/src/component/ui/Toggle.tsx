@@ -10,8 +10,6 @@ interface Props {
 
 interface State {
   enabled: boolean;
-  // buttonClassName: string;
-  // backgroundClassName: string;
 }
 
 export class Toggle extends Component<Props, State> {
