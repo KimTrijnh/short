@@ -35,6 +35,7 @@ export class DynamicDecisionService implements IFeatureDecisionService {
   private makeCachedDecision(featureID: string): Promise<boolean> {
     const decision = this.cacheService.get<boolean>(featureID);
     if (decision) {
+      console.log("cached");
       return Promise.resolve(decision);
     }
     return this.shortHTTPApi

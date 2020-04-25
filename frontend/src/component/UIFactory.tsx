@@ -102,6 +102,7 @@ export class UIFactory {
     const ToggledComponent = withFeatureToggle(PublicListingToggle, decision);
     return (
       <ToggledComponent
+        isShortLinkPublic={props.isShortLinkPublic}
         onToggleClick={props.onPublicToggleClick}
       />
     );
