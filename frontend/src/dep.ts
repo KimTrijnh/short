@@ -18,7 +18,7 @@ import { GraphQLService } from './service/GraphQL.service';
 import { FetchHTTPService } from './service/HTTP.service';
 import { ShortHTTPApi } from './service/ShortHTTP.api';
 import { DynamicDecisionService } from './service/feature-decision/DynamicDecision.service';
-import { InMemoryCache } from './service/cache/in-memory.cache';
+import { InfiniteCache } from './service/cache/infinite.cache';
 
 export function initEnvService(): EnvService {
   return new EnvService();
@@ -44,10 +44,10 @@ export function initUIFactory(
   const errorService = new ErrorService();
   const httpService = new FetchHTTPService();
   const shortHTTPApi = new ShortHTTPApi(httpService, envService);
-  const inMemoryCache = new InMemoryCache();
+  const infiniteCache = new InfiniteCache();
   const dynamicDecisionService = new DynamicDecisionService(
     shortHTTPApi,
-    inMemoryCache
+    infiniteCache
   );
 
   const graphQLService = new GraphQLService(httpService);

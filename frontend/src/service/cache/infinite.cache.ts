@@ -1,13 +1,13 @@
 import { Cache } from './cache';
 
-export class InMemoryCache implements Cache {
+export class InfiniteCache implements Cache {
   private readonly buffer: { [key: string]: any };
 
   constructor() {
     this.buffer = {};
   }
 
-  get<Data>(key: string): Data {
+  get<Data>(key: string): Data | null {
     return this.buffer[key];
   }
 
