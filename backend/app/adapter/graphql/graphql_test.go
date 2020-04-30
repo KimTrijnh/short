@@ -8,10 +8,11 @@ import (
 
 	"github.com/short-d/app/mdtest"
 	"github.com/short-d/short/app/adapter/db"
-	"github.com/short-d/short/app/usecase/auth"
+	"github.com/short-d/short/app/usecase/authenticator"
 	"github.com/short-d/short/app/usecase/changelog"
 	"github.com/short-d/short/app/usecase/keygen"
 	"github.com/short-d/short/app/usecase/requester"
+	"github.com/short-d/short/app/usecase/risk"
 	"github.com/short-d/short/app/usecase/service"
 	"github.com/short-d/short/app/usecase/url"
 	"github.com/short-d/short/app/usecase/validator"
@@ -19,6 +20,8 @@ import (
 
 func TestGraphQlAPI(t *testing.T) {
 	now := time.Now()
+	blockedURLs := map[string]bool{}
+	blacklist := risk.NewBlackListFake(blockedURLs)
 	sqlDB, _, err := mdtest.NewSQLStub()
 	mdtest.Equal(t, nil, err)
 	defer sqlDB.Close()
@@ -31,17 +34,22 @@ func TestGraphQlAPI(t *testing.T) {
 	mdtest.Equal(t, nil, err)
 	longLinkValidator := validator.NewLongLink()
 	customAliasValidator := validator.NewCustomAlias()
+	timer := mdtest.NewTimerFake(time.Now())
+	riskDetector := risk.NewDetector(blacklist)
+
 	creator := url.NewCreatorPersist(
 		urlRepo,
 		urlRelationRepo,
 		keyGen,
 		longLinkValidator,
 		customAliasValidator,
+		timer,
+		riskDetector,
 	)
 
 	s := service.NewReCaptchaFake(service.VerifyResponse{})
 	verifier := requester.NewVerifier(s)
-	authenticator := auth.NewAuthenticatorFake(time.Now(), time.Hour)
+	auth := authenticator.NewAuthenticatorFake(time.Now(), time.Hour)
 
 	logger := mdtest.NewLoggerFake(mdtest.FakeLoggerArgs{})
 	tracer := mdtest.NewTracerFake()
@@ -49,6 +57,6 @@ func TestGraphQlAPI(t *testing.T) {
 	timerFake := mdtest.NewTimerFake(now)
 	changeLogRepo := db.NewChangeLogSQL(sqlDB)
 	changeLog := changelog.NewPersist(keyGen, timerFake, changeLogRepo)
-	graphqlAPI := NewShort(&logger, &tracer, retriever, creator, changeLog, verifier, authenticator)
+	graphqlAPI := NewShort(&logger, &tracer, retriever, creator, changeLog, verifier, auth)
 	mdtest.Equal(t, true, mdtest.IsGraphQlAPIValid(graphqlAPI))
 }

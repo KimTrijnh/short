@@ -21,6 +21,10 @@
     }
   }
 
+  .user-short-links-section {
+    margin-top: 20px;
+  }
+
   @include respond-to($phone) {
     .title {
       text-align: center;

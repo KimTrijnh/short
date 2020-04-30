@@ -20,6 +20,7 @@ import { Store } from 'redux';
 import {
   clearError,
   raiseCreateShortLinkError,
+  raiseGetUserShortLinksError,
   raiseInputError,
   updateAlias,
   updateCreatedUrl,
@@ -36,6 +37,11 @@ import { CreateShortLinkSection } from './shared/CreateShortLinkSection';
 import { Toast } from '../ui/Toast';
 import { IClipboardService } from '../../service/clipboardService/Clipboard.service';
 import { Icon, IconID } from '../ui/Icon';
+import {
+  IPagedShortLinks,
+  ShortLinkService
+} from '../../service/ShortLink.service';
+import { AnalyticsService } from '../../service/Analytics.service';
 
 interface Props {
   uiFactory: UIFactory;
@@ -48,6 +54,8 @@ interface Props {
   searchService: SearchService;
   errorService: ErrorService;
   changeLogService: ChangeLogService;
+  shortLinkService: ShortLinkService;
+  analyticsService: AnalyticsService;
   store: Store<IAppState>;
   location: Location;
 }
@@ -64,6 +72,7 @@ interface State {
   inputErr?: string;
   autoCompleteSuggestions?: Array<Url>;
   changeLog?: Array<Update>;
+  currentPagedShortLinks?: IPagedShortLinks;
 }
 
 export class HomePage extends Component<Props, State> {
@@ -81,6 +90,7 @@ export class HomePage extends Component<Props, State> {
   }
 
   async componentDidMount() {
+    this.props.analyticsService.track('homePageLoad');
     this.setPromoDisplayStatus();
 
     this.props.authService.cacheAuthToken(this.props.location.search);
@@ -227,10 +237,13 @@ export class HomePage extends Component<Props, State> {
       .createShortLink(editingUrl)
       .then((createdUrl: Url) => {
         this.props.store.dispatch(updateCreatedUrl(createdUrl));
+
         const shortLink = this.props.urlService.aliasToFrontendLink(
           createdUrl.alias!
         );
         this.copyShortenedLink(shortLink);
+
+        this.refreshUserShortLinks();
       })
       .catch(({ authenticationErr, createShortLinkErr }) => {
         if (authenticationErr) {
@@ -265,6 +278,42 @@ export class HomePage extends Component<Props, State> {
     }
   };
 
+  private refreshUserShortLinks = () => {
+    if (!this.state.currentPagedShortLinks) {
+      return;
+    }
+    const { offset, pageSize } = this.state.currentPagedShortLinks;
+    this.updateCurrentPagedShortLinks(offset, pageSize);
+  };
+
+  private updateCurrentPagedShortLinks = (offset: number, pageSize: number) => {
+    this.props.shortLinkService
+      .getUserCreatedShortLinks(offset, pageSize)
+      .then((pagedShortLinks: IPagedShortLinks) => {
+        this.setState({ currentPagedShortLinks: pagedShortLinks });
+      })
+      .catch(({ authenticationErr, getUserShortLinksErr }) => {
+        this.clearUserShortLinks();
+
+        if (authenticationErr) {
+          this.requestSignIn();
+          return;
+        }
+
+        this.props.store.dispatch(
+          raiseGetUserShortLinksError(getUserShortLinksErr)
+        );
+      });
+  };
+
+  private clearUserShortLinks = () => {
+    this.setState({ currentPagedShortLinks: undefined });
+  };
+
+  handleOnShortLinkPageLoad = (offset: number, pageSize: number) => {
+    this.updateCurrentPagedShortLinks(offset, pageSize);
+  };
+
   render = () => {
     return (
       <div className="home">
@@ -291,6 +340,14 @@ export class HomePage extends Component<Props, State> {
             onShortLinkTextFieldChange={this.handleAliasChange}
             onCreateShortLinkButtonClick={this.handleCreateShortLinkClick}
           />
+          {this.state.isUserSignedIn && (
+            <div className={'user-short-links-section'}>
+              {this.props.uiFactory.createUserShortLinksSection({
+                onPageLoad: this.handleOnShortLinkPageLoad,
+                pagedShortLinks: this.state.currentPagedShortLinks
+              })}
+            </div>
+          )}
         </div>
         <Footer
           uiFactory={this.props.uiFactory}
